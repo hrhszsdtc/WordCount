@@ -122,9 +122,9 @@ class GUI(ttk.Frame, TabToNormal):
                     content = f.read()
             try:
                 text = content.lower()
-                text = re.sub("\W+", " ", text)
+                text = re.sub(r"[^A-Za-z\\'-]", " ", text)
                 global words
-                words = re.findall(r"\b[a-zA-Z]+\b", text)
+                words = re.findall(r"\b\w+(?:-\w+)*\b", text)
                 counts = Counter(words)
                 items = counts.most_common()
                 table = tabulate(items, headers=["Word", "Count"], tablefmt="pretty")
