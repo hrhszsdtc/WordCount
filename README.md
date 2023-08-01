@@ -13,7 +13,7 @@ An English word frequency statistics tool
 1. 进入src文件夹
 2. 安装必要Python环境和必要的库  
  `pip install -r requirements.txt`
-3. 运行  
+3. 运行脚本  
 `python main.py`
 4. 按照GUI提示操作
 
