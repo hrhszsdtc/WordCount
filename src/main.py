@@ -80,7 +80,11 @@ class GUI(ttk.Frame, TabToNormal):
         TabToNormal.__init__(self)
         self.master = master
         self.master.title("英文词频统计")
-        self.master.call("wm", "iconphoto", self.master._w, tk.PhotoImage(file="icon.png"))
+        scriptpath = os.path.abspath(__file__)
+        scriptdir = os.path.dirname(scriptpath)
+        imagepath = os.path.join(scriptdir, "icon.png")
+        img = tk.PhotoImage(file=imagepath)
+        self.master.call("wm", "iconphoto", self.master._w, img)
         self.grid()
         self.create_widgets()
 
