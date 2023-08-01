@@ -10,7 +10,7 @@ import signal
 import sys
 import tkinter as tk
 from collections import Counter
-from tkinter import filedialog, ttk
+from tkinter import filedialog, messagebox, ttk
 
 import easyocr
 import fitz
@@ -61,6 +61,7 @@ def parseImg(f, queue):
     detail = parse_img(f)
     queue.put(detail)
 
+
 supported_output_formats = {
     "Excel": ["excel", ".xlsx"],
     "Markdown": ["github", ".md"],
@@ -70,7 +71,16 @@ supported_output_formats = {
 }
 
 
-class TabToNormal:
+class SingletonTabToNormal(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
+class TabToNormal(metaclass=SingletonTabToNormal):
     def __init__(self):
         self.file_path = tk.StringVar()
         self.file_path.choose_file = self.file_path
@@ -84,21 +94,25 @@ class TabToNormal:
         chosen_value = chosen_value_list[0]
         counts = Counter(word)
         items = counts.most_common()
-        if chosen_value == "excel":
-            tab = tabulate(items, headers=["Word", "Count"], tablefmt="github")
-            self.table_to_excel(tab)
-        else:
-            tab = tabulate(items, headers=["Word", "Count"], tablefmt=chosen_value)
-            suffix = chosen_value_list[1]
-            with open("output" + suffix, "w", encoding="utf-8") as f:
-                f.write(tab)
+        filetypes = [(model, chosen_value_list[1])]
+        filename = filedialog.asksaveasfilename(
+            filetypes=filetypes, defaultextension=chosen_value_list[1]
+        )
+        if filename:
+            if chosen_value == "excel":
+                tab = tabulate(items, headers=["Word", "Count"], tablefmt="github")
+                self.table_to_excel(tab, filename)
+            else:
+                tab = tabulate(items, headers=["Word", "Count"], tablefmt=chosen_value)
+                with open(filename, "w", encoding="utf-8") as f:
+                    f.write(tab)
 
-    def table_to_excel(self, table):
+    def table_to_excel(self, table, filename):
         new_tab = self.table_to_new(table)
         df = pd.DataFrame(
             {"Word": [row[0] for row in new_tab], "Count": [row[1] for row in new_tab]}
         )
-        df.to_excel("output.xlsx", sheet_name="Sheet1", header=None, index=False)
+        df.to_excel(filename + ".xlsx", sheet_name="Sheet1", header=None, index=False)
 
     def table_to_new(self, table):
         table_list = table.splitlines()
@@ -183,13 +197,16 @@ class GUI(ttk.Frame, TabToNormal):
                 items = counts.most_common()
                 table = tabulate(items, headers=["Word", "Count"], tablefmt="pretty")
                 sys.stdout.write(table)
+                messagebox.showinfo("成功", "已成功统计")
             except Exception as e:
+                messagebox.showerror("失败", f"发生错误:{e}")
                 sys.stderr.write(f"内部错误:{e}")
         except FileNotFoundError as fe:
+            messagebox.showwarning("警告", "请选择一个正确的文件")
             sys.stderr.write(f"{fe}: 文件{file}未找到")
         except Exception as e:
+            messagebox.showerror("失败", f"发生错误:{e}")
             sys.stderr.write(f"{e}")
-
 
 
 class PrintToText:
