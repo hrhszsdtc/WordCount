@@ -28,7 +28,7 @@ def parse_pdf(file):
             return
 
 
-def parsr_img(file):
+def parse_img(file):
     try:
         reader = easyocr.Reader(["en"])
         result = reader.readtext(file)
@@ -163,7 +163,7 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    self.img_thread = threading.Thread(target=parsr_img, args=f)
+                    self.img_thread = threading.Thread(target=parse_img, args=f)
                     self.img_thread.start()
                     self.img_thread.join()
                     result = self.img_thread.result
