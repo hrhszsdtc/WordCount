@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import contextlib
+import ctypes
 import io
 import os
 import re
@@ -12,9 +13,10 @@ from tkinter import filedialog, ttk
 
 import easyocr
 import fitz
-import my_thread
 import pandas as pd
 from tabulate import tabulate
+
+my_thread = ctypes.CDLL(os.path.join(os.path.dirname(__file__), "my_threads.dll"))
 
 
 def parse_pdf(file):
@@ -163,8 +165,7 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    mt = my_thread.MyThreads()
-                    content = mt.run(lambda: parse_img(f))
+                    content = my_thread.run(lambda: parse_img(f))
                 else:
                     content = f.read()
             try:
