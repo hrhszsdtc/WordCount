@@ -7,6 +7,7 @@ import os
 import re
 import signal
 import sys
+import threading
 import tkinter as tk
 from collections import Counter
 from tkinter import filedialog, ttk
@@ -162,7 +163,13 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    content = parsr_img(f)
+                    self.img_thread = threading.Thread(target=parsr_img, args=f)
+                    self.img_thread.start()
+                    self.img_thread.join()
+                    result = self.img_thread.result
+                    if result:
+                        content = result
+                        del self.img_thread
                 else:
                     content = f.read()
             try:
