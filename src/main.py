@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import contextlib
-import ctypes
+import functools
 import io
+import multiprocessing
 import os
 import re
 import signal
@@ -15,8 +16,6 @@ import easyocr
 import fitz
 import pandas as pd
 from tabulate import tabulate
-
-my_thread = ctypes.CDLL(os.path.join(os.path.dirname(__file__), "my_threads.dll"))
 
 
 def parse_pdf(file):
@@ -46,15 +45,21 @@ def parse_img(file):
         return
 
 
-def get_file_name(file):
-    return os.path.splitext(os.path.basename(file))[0]
+def new_process(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        queue = multiprocessing.Queue()
+        p = multiprocessing.Process(target=func, args=(queue, *args), kwargs=kwargs)
+        p.start()
+        return p, queue
+
+    return wrapper
 
 
-def get_file():
-    root = tk.Tk()
-    root.withdraw()
-    root.attributes("-topmost", True)
-
+@new_process
+def parseImg(f, queue):
+    detail = parse_img(f)
+    queue.put(detail)
 
 supported_output_formats = {
     "Excel": ["excel", ".xlsx"],
@@ -165,7 +170,9 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    content = my_thread.run(lambda: parse_img(f))
+                    p, q = parseImg(f)
+                    p.join()
+                    content = q.get()
                 else:
                     content = f.read()
             try:
@@ -182,6 +189,7 @@ class GUI(ttk.Frame, TabToNormal):
             sys.stderr.write(f"{fe}: 文件{file}未找到")
         except Exception as e:
             sys.stderr.write(f"{e}")
+
 
 
 class PrintToText:
