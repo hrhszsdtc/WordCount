@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import contextlib
+import dill
 import functools
 import io
 import multiprocessing
@@ -29,37 +30,35 @@ def parse_pdf(file):
             return
 
 
-def parse_img(file):
+reader = easyocr.Reader(["en"])
+queue = multiprocessing.Queue()
+
+
+def parse_img_inner(f, queue, reader):
     try:
-        reader = easyocr.Reader(["en"])
-        result = reader.readtext(file)
+        result = reader.readtext(f)
         text = ""
         for result in result:
             text += result[1] + " "
+        queue.put(text)
         return text
     except KeyboardInterrupt as ke:
+        messagebox.showinfo("任务已取消", str(ke))
         sys.stderr.write(f"取消任务:{ke}")
         return
     except Exception as e:
+        messagebox.showerror("错误", str(e))
         sys.stderr.write(f"错误:{e}")
         return
 
 
-def new_process(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        queue = multiprocessing.Queue()
-        p = multiprocessing.Process(target=func, args=(queue, *args), kwargs=kwargs)
-        p.start()
-        return p, queue
-
-    return wrapper
-
-
-@new_process
-def parseImg(f, queue):
-    detail = parse_img(f)
-    queue.put(detail)
+def parse_img(f):
+    p = multiprocessing.Process(target=parse_img_inner, args=(f, queue, reader), kwargs=None)
+    p.start()
+    p.join()
+    details = queue.get()
+    if details is not None:
+        return details.split()
 
 
 supported_output_formats = {
@@ -184,9 +183,7 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    p, q = parseImg(f)
-                    p.join()
-                    content = q.get()
+                    content = parse_img(f)
                 else:
                     content = f.read()
             try:
