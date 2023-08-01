@@ -79,7 +79,8 @@ class GUI(ttk.Frame, TabToNormal):
         super().__init__(master)
         TabToNormal.__init__(self)
         self.master = master
-        self.master.title("英文词频统计 by hrh123 from www.52pojie.cn")
+        self.master.title("英文词频统计")
+        self.master.call("wm", "iconphoto", self.master._w, tk.PhotoImage(file="icon.png"))
         self.grid()
         self.create_widgets()
 
