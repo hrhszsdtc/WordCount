@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import contextlib
-import dill
 import functools
 import io
 import multiprocessing
@@ -13,10 +12,13 @@ import tkinter as tk
 from collections import Counter
 from tkinter import filedialog, messagebox, ttk
 
+import dill
 import easyocr
 import fitz
 import pandas as pd
 from tabulate import tabulate
+
+import log
 
 
 def parse_pdf(file):
@@ -30,11 +32,11 @@ def parse_pdf(file):
             return
 
 
-reader = easyocr.Reader(["en"])
 queue = multiprocessing.Queue()
 
 
-def parse_img_inner(f, queue, reader):
+def parse_img_inner(f, queue):
+    reader = easyocr.Reader(["en"])
     try:
         result = reader.readtext(f)
         text = ""
@@ -44,16 +46,16 @@ def parse_img_inner(f, queue, reader):
         return text
     except KeyboardInterrupt as ke:
         messagebox.showinfo("任务已取消", str(ke))
-        sys.stderr.write(f"取消任务:{ke}")
+        log.info(f"取消任务:{ke}")
         return
     except Exception as e:
         messagebox.showerror("错误", str(e))
-        sys.stderr.write(f"错误:{e}")
+        log.warning(f"错误:{e}")
         return
 
 
 def parse_img(f):
-    p = multiprocessing.Process(target=parse_img_inner, args=(f, queue, reader), kwargs=None)
+    p = multiprocessing.Process(target=parse_img_inner, args=(f, queue), kwargs=None)
     p.start()
     p.join()
     details = queue.get()
@@ -197,13 +199,13 @@ class GUI(ttk.Frame, TabToNormal):
                 messagebox.showinfo("成功", "已成功统计")
             except Exception as e:
                 messagebox.showerror("失败", f"发生错误:{e}")
-                sys.stderr.write(f"内部错误:{e}")
+                log.critical(f"内部错误:{e}")
         except FileNotFoundError as fe:
             messagebox.showwarning("警告", "请选择一个正确的文件")
-            sys.stderr.write(f"{fe}: 文件{file}未找到")
+            log.debug(f"{fe}: 文件{file}未找到")
         except Exception as e:
             messagebox.showerror("失败", f"发生错误:{e}")
-            sys.stderr.write(f"{e}")
+            log.error(f"{e}")
 
 
 class PrintToText:
