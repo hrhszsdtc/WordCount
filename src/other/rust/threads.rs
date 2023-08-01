@@ -10,16 +10,23 @@ struct MyThreads {}
 #[pymethods]
 impl MyThreads {
     #[args(func)]
-    fn run(&self, py: Python, func: &PyAny) -> PyResult{
+    fn run(&self, py: Python, func: &PyAny) -> PyResult<()> {
+        if !func.is_callable() {
+            return Err(pyo3::exceptions::PyTypeError::new_err(
+                "func is not callable",
+            ));
+        }
         let callable = func.to_object(py);
         let handle = thread::spawn(move || {
             let gil = Python::acquire_gil();
             let py = gil.python();
-            let result = callable.call0(py).unwrap();
-            result.into_py(py);
+            match callable.call0(py) {
+                Ok(result) => result.into_py(py),
+                Err(e) => e.into_py(py),
+            }
         });
-        let output = handle.join().unwrap();
-        Ok(output.into())
+        handle.detach();
+        Ok(())
     }
 }
 
@@ -28,5 +35,3 @@ fn my_module(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<MyThreads>()?;
     Ok(())
 }
-
-
