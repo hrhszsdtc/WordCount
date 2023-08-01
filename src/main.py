@@ -14,7 +14,7 @@ import pandas as pd
 from tabulate import tabulate
 
 
-def parsePDF(file):
+def parse_pdf(file):
     with fitz.open(file) as doc:
         text = ""
         for page in doc.pages():
@@ -22,10 +22,10 @@ def parsePDF(file):
         if text:
             return text
         else:
-            return -1
+            return ""
 
 
-supported_output_format = {
+supported_output_formats = {
     "Excel": ["excel", ".xlsx"],
     "Markdown": ["github", ".md"],
     "HTML": ["html", ".html"],
@@ -44,7 +44,7 @@ class TabToNormal:
         return self.file_path.get()
 
     def to_new(self, model, word):
-        chosen_value_list = supported_output_format.get(model)
+        chosen_value_list = supported_output_formats.get(model)
         chosen_value = chosen_value_list[0]
         counts = Counter(word)
         items = counts.most_common()
@@ -70,9 +70,6 @@ class TabToNormal:
         table_list = [list(filter(None, line)) for line in table_list]
         table_list = table_list[2:]
         return table_list
-
-
-words = None
 
 
 class GUI(ttk.Frame, TabToNormal):
@@ -103,7 +100,7 @@ class GUI(ttk.Frame, TabToNormal):
         )
         self.button_file.grid(row=1, column=0)
         self.combobox = ttk.Combobox(self, state="readonly")
-        self.combobox["values"] = list(supported_output_format.keys())
+        self.combobox["values"] = list(supported_output_formats.keys())
         self.combobox.current(0)
         self.combobox.grid(row=1, column=1, sticky="e")
         self.button = ttk.Button(self, text="导出", command=self.button_command)
@@ -111,9 +108,8 @@ class GUI(ttk.Frame, TabToNormal):
 
     def button_command(self):
         mode = self.combobox.get()
-        global words
-        if words:
-            self.to_new(mode, words)
+        if self.words:
+            TabToNormal().to_new(mode, self.words)
         else:
             return
 
@@ -123,19 +119,17 @@ class GUI(ttk.Frame, TabToNormal):
             with open(file, "r", encoding="utf-8") as f:
                 filename, extension = os.path.splitext(f.name)
                 if extension in [".pdf", ".xps", ".oxps", ".cbz", ".fb2", ".epub"]:
-                    content = parsePDF(f)
+                    content = parse_pdf(f)
                 else:
                     content = f.read()
             try:
                 text = content.lower()
                 text = re.sub(r"[^A-Za-z\\'-]", " ", text)
-                global words
-                words = re.findall(r"\b\w+(?:-\w+)*\b", text)
-                counts = Counter(words)
+                self.words = re.findall(r"\b\w+(?:-\w+)*\b", text)
+                counts = Counter(self.words)
                 items = counts.most_common()
                 table = tabulate(items, headers=["Word", "Count"], tablefmt="pretty")
                 sys.stdout.write(table)
-                return words
             except Exception as e:
                 sys.stderr.write(f"内部错误:{e}")
         except FileNotFoundError as fe:
@@ -154,12 +148,10 @@ class PrintToText:
         self.text.update()
 
 
-def start_gui():
+if __name__ == "__main__":
     root = tk.Tk()
     gui = GUI(master=root)
+    gui.words = None
     ptt = PrintToText(gui.text)
     with contextlib.redirect_stdout(ptt), contextlib.redirect_stderr(ptt):
         gui.master.mainloop()
-
-
-start_gui()
