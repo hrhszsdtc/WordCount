@@ -6,7 +6,7 @@ An English word frequency statistics tool
 
 ## 介绍
 
-一个英文词频统计工具,支持扫描包括pdf在内的多种文档格式并支持输出至Excel,Markdown,HTML等表格
+一个英文词频统计工具,支持扫描包括pdf在内的多种文档格式以及多种图片文件并支持输出至Excel,Markdown,HTML等表格
 
 ## 使用方法
 

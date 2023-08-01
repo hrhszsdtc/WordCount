@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import contextlib
+import easyocr
 import io
 import os
 import re
+import signal
 import sys
 import tkinter as tk
 from collections import Counter
@@ -22,7 +24,33 @@ def parse_pdf(file):
         if text:
             return text
         else:
-            return ""
+            return
+
+
+def parsr_img(file):
+    try:
+        reader = easyocr.Reader(["en"])
+        result = reader.readtext(file)
+        text = ""
+        for result in result:
+            text += result[1] + " "
+        return text
+    except KeyboardInterrupt as ke:
+        sys.stderr.write(f"取消任务:{ke}")
+        return
+    except Exception as e:
+        sys.stderr.write(f"错误:{e}")
+        return
+
+
+def get_file_name(file):
+    return os.path.splitext(os.path.basename(file))[0]
+
+
+def get_file():
+    root = tk.Tk()
+    root.withdraw()
+    root.attributes("-topmost", True)
 
 
 supported_output_formats = {
@@ -120,6 +148,21 @@ class GUI(ttk.Frame, TabToNormal):
                 filename, extension = os.path.splitext(f.name)
                 if extension in [".pdf", ".xps", ".oxps", ".cbz", ".fb2", ".epub"]:
                     content = parse_pdf(f)
+                elif extension in [
+                    ".png",
+                    ".jpg",
+                    ".jpeg",
+                    ".bmp",
+                    ".tiff",
+                    ".tif",
+                    ".tga",
+                    ".icb",
+                    ".vda",
+                    ".vst",
+                    ".dcm",
+                    ".dcm30",
+                ]:
+                    content = parsr_img(f)
                 else:
                     content = f.read()
             try:
