@@ -23,7 +23,7 @@ impl MyThreads {
     }
 }
 
-#[pymodule]
+#[pymodule(my_threads)]
 fn my_module(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<MyThreads>()?;
     Ok(())
