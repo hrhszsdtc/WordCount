@@ -5,8 +5,8 @@ edition = "2021"
 
 [lib]
 name = "my_threads"
-path = "src/other/rust/threads.rs"
+path = "threads.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.15.1", features = ["extension-module"] }
+pyo3 = { version="0.16.0", features = ["extension-module"] }

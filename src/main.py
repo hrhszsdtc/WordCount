@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import contextlib
-import easyocr
 import io
 import os
 import re
 import signal
 import sys
-import threading
 import tkinter as tk
 from collections import Counter
 from tkinter import filedialog, ttk
 
+import easyocr
 import fitz
+import my_thread
 import pandas as pd
 from tabulate import tabulate
 
@@ -163,13 +163,8 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    self.img_thread = threading.Thread(target=parse_img, args=f)
-                    self.img_thread.start()
-                    self.img_thread.join()
-                    result = self.img_thread.result
-                    if result:
-                        content = result
-                        del self.img_thread
+                    mt = my_thread.MyThreads()
+                    content = mt.run(lambda: parse_img(f))
                 else:
                     content = f.read()
             try:

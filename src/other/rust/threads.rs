@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use pyo3::types::PyAny;
-use pyo3::wrap_pyfunction;
 
+use std::mem;
 use std::thread;
 
 #[pyclass]
@@ -25,12 +25,13 @@ impl MyThreads {
                 Err(e) => e.into_py(py),
             }
         });
-        handle.detach();
+        mem::forget(handle);
         Ok(())
     }
 }
 
-#[pymodule(my_threads)]
+#[pymodule]
+#[pyo3(name = "my_threads")]
 fn my_module(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<MyThreads>()?;
     Ok(())
