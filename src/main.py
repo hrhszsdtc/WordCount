@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import contextlib
-import fitz
 import io
 import os
-import pandas as pd
 import re
 import sys
 import tkinter as tk
-from tkinter import filedialog, ttk
 from collections import Counter
+from tkinter import filedialog, ttk
+
+import fitz
+import pandas as pd
 from tabulate import tabulate
 
 
