@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import aiofiles
+import asyncio
 import contextlib
-import functools
 import io
-import multiprocessing
 import os
 import re
 import signal
@@ -12,7 +12,6 @@ import tkinter as tk
 from collections import Counter
 from tkinter import filedialog, messagebox, ttk
 
-import dill
 import easyocr
 import fitz
 import pandas as pd
@@ -32,18 +31,14 @@ def parse_pdf(file):
             return
 
 
-queue = multiprocessing.Queue()
-
-
-def parse_img_inner(f, queue):
+async def parse_img(f):
     reader = easyocr.Reader(["en"])
     try:
-        result = reader.readtext(f)
-        text = ""
-        for result in result:
-            text += result[1] + " "
-        queue.put(text)
-        return text
+        async with aiofiles.open(f, "rb") as file:
+            content = await file.read(file)
+            result = await reader.readtext(content)
+            text = " ".join([r[1] for r in result])
+            return text
     except KeyboardInterrupt as ke:
         messagebox.showinfo("任务已取消", str(ke))
         log.info(f"取消任务:{ke}")
@@ -52,15 +47,6 @@ def parse_img_inner(f, queue):
         messagebox.showerror("错误", str(e))
         log.warning(f"错误:{e}")
         return
-
-
-def parse_img(f):
-    p = multiprocessing.Process(target=parse_img_inner, args=(f, queue), kwargs=None)
-    p.start()
-    p.join()
-    details = queue.get()
-    if details is not None:
-        return details.split()
 
 
 supported_output_formats = {
@@ -185,7 +171,7 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    content = parse_img(f)
+                    content = asyncio.run(parse_img(f))
                 else:
                     content = f.read()
             try:
