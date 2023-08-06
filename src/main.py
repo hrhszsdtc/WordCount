@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import aiofiles
 import asyncio
 import contextlib
 import io
@@ -12,6 +11,7 @@ import tkinter as tk
 from collections import Counter
 from tkinter import filedialog, messagebox, ttk
 
+import aiofiles
 import easyocr
 import fitz
 import pandas as pd
