@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
+import concurrent.futures
 import contextlib
 import io
 import os
@@ -171,7 +172,8 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    content = asyncio.run(parse_img(f))
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        content = executor.submit(asyncio.run, parse_img(f)).result()
                 else:
                     content = f.read()
             try:
