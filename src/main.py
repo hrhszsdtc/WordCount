@@ -29,6 +29,8 @@ def parse_pdf(file):
             return text
         else:
             return
+
+
 reader = easyocr.Reader(["en"])
 
 
