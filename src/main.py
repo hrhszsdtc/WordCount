@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import asyncio
-import concurrent.futures
 import contextlib
 import io
 import os
@@ -30,16 +29,17 @@ def parse_pdf(file):
             return text
         else:
             return
+reader = easyocr.Reader(["en"])
 
 
 async def parse_img(f):
-    reader = easyocr.Reader(["en"])
     try:
+        loop = asyncio.get_event_loop()
         async with aiofiles.open(f, "rb") as file:
-            content = await file.read()
-            result = await reader.readtext(content)
-            text = " ".join([r[1] for r in result])
-            return text
+            content = await loop.run_in_executor(None, file.read)
+        result = await loop.run_in_executor(None, reader.readtext, content)
+        text = " ".join([r[1] for r in result])
+        return text
     except KeyboardInterrupt as ke:
         messagebox.showinfo("任务已取消", str(ke))
         log.info(f"取消任务:{ke}")
@@ -172,8 +172,8 @@ class GUI(ttk.Frame, TabToNormal):
                     ".dcm",
                     ".dcm30",
                 ]:
-                    with concurrent.futures.ThreadPoolExecutor() as executor:
-                        content = executor.submit(asyncio.run, parse_img(f)).result()
+                    loop = asyncio.get_event_loop()
+                    loop.run_until_complete(parse_img(f))
                 else:
                     content = f.read()
             try:
