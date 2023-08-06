@@ -36,7 +36,7 @@ async def parse_img(f):
     reader = easyocr.Reader(["en"])
     try:
         async with aiofiles.open(f, "rb") as file:
-            content = await file.read(file)
+            content = await file.read()
             result = await reader.readtext(content)
             text = " ".join([r[1] for r in result])
             return text
