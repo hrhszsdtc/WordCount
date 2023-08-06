@@ -31,11 +31,9 @@ def parse_pdf(file):
             return
 
 
-reader = easyocr.Reader(["en"])
-
-
 async def parse_img(f):
     try:
+        reader = easyocr.Reader(["en"])
         loop = asyncio.get_event_loop()
         async with aiofiles.open(f, "rb") as file:
             content = await loop.run_in_executor(None, file.read)
