@@ -4,7 +4,6 @@ import asyncio
 import contextlib
 import io
 import os
-import re
 import signal
 import sys
 import tkinter as tk
@@ -15,9 +14,13 @@ import aiofiles
 import easyocr
 import fitz
 import pandas as pd
+from julia import Main
 from tabulate import tabulate
 
 import log
+
+Main.include("my_julia_re.jl")
+MyJuliaRe = Main.MyJuliaRe
 
 
 def parse_pdf(file):
@@ -178,8 +181,8 @@ class GUI(ttk.Frame, TabToNormal):
                     content = f.read()
             try:
                 text = content.lower()
-                text = re.sub(r"[^A-Za-z\\'-]", " ", text)
-                self.words = re.findall(r"\b\w+(?:-\w+)*\b", text)
+                text = MyJuliaRe.re_sub(r"[^A-Za-z\\'-]", " ", text)
+                self.words = MyJuliaRe.re_findall(r"\b\w+(?:-\w+)*\b", text)
                 counts = Counter(self.words)
                 items = counts.most_common()
                 table = tabulate(items, headers=["Word", "Count"], tablefmt="pretty")
