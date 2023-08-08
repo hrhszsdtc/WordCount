@@ -17,10 +17,6 @@ An English word frequency statistics tool
 - 优化你的网站或博客的搜索引擎排名,通过分析你的内容中出现的关键词或短语,你可以调整你的标题,描述,标签等元素,让你的网站或博客更容易被搜索引擎发现和推荐
 - 分析英文考试高频词,比如四六级英语,考研英语等等,方便背诵重点词汇
 
-## 联系作者
-
-`tech-whimsy(at)outlook.com`
-
 ## 版权声明
 
-*Copyright (C) hrhszsdtc All Rights Reserved.*
+*Copyright (C) hrhszsdtc.*
