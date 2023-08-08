@@ -8,15 +8,6 @@ An English word frequency statistics tool
 
 一个英文词频统计工具,支持扫描包括pdf在内的多种文档格式以及多种图片文件并支持输出至Excel,Markdown,HTML等表格
 
-## 使用方法
-
-1. 进入src文件夹
-2. 安装必要Python环境和必要的库  
- `pip install -r requirements.txt`
-3. 运行脚本  
-`python main.py`
-4. 按照GUI提示操作
-
 ## 用途
 
 本项目用途广泛,包括但不限于:
