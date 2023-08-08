@@ -38,21 +38,20 @@ vector<vector<string>> table_to_new(string table)
 
 extern "C"
 {
-    shared_ptr<shared_ptr<char[]>[]> table_to_new_wrapper(const char *table)
+    vector<vector<string>> table_to_new_wrapper(const string &table)
     {
-        string table_str(table);
-        vector<vector<string>> table_list = table_to_new(table_str);
+        vector<vector<string>> table_list = table_to_new(table);
         int rows = table_list.size();
         int cols = table_list[0].size();
-        shared_ptr<shared_ptr<char[]>[]> result = make_shared<shared_ptr<char[]>[]>(rows);
+        vector<vector<string>> result(rows, vector<string>(cols));
         for (int i = 0; i < rows; i++)
         {
-            result[i] = make_shared<char[]>(cols + 1);
             for (int j = 0; j < cols; j++)
             {
-                strcpy(result[i][j], table_list[i][j].c_str());
+                std::ostringstream oss;
+                oss << table_list[i][j];
+                result[i][j] = oss.str();
             }
-            result[i][cols] = nullptr;
         }
         return result;
     }
