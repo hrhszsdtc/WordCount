@@ -18,6 +18,7 @@ from julia import Main
 from tabulate import tabulate
 
 import log
+import table_to_new
 
 Main.include("my_julia_re.jl")
 MyJuliaRe = Main.MyJuliaRe
@@ -114,18 +115,20 @@ class TabToNormal(metaclass=SingletonTabToNormal):
                     f.write(tab)
 
     def table_to_excel(self, table, filename):
-        new_tab = self.table_to_new(table)
+        new_tab = table_to_new.table_to_new.table_to_new(table)
         df = pd.DataFrame(
             {"Word": [row[0] for row in new_tab], "Count": [row[1] for row in new_tab]}
         )
         df.to_excel(filename + ".xlsx", sheet_name="Sheet1", header=None, index=False)
 
+    """
     def table_to_new(self, table):
         table_list = table.splitlines()
         table_list = [line.split("|") for line in table_list]
         table_list = [list(filter(None, line)) for line in table_list]
         table_list = table_list[2:]
         return table_list
+    """
 
 
 class GUI(ttk.Frame, TabToNormal):
