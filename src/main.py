@@ -53,6 +53,21 @@ async def parse_img(f):
         return
 
 
+supported_doc_formats = [".pdf", ".xps", ".oxps", ".cbz", ".fb2", ".epub"]
+supported_img_formats = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".bmp",
+    ".tiff",
+    ".tif",
+    ".tga",
+    ".icb",
+    ".vda",
+    ".vst",
+    ".dcm",
+    ".dcm30",
+]
 supported_output_formats = {
     "Excel": ["excel", ".xlsx"],
     "Markdown": ["github", ".md"],
@@ -159,22 +174,9 @@ class GUI(ttk.Frame, TabToNormal):
         try:
             with open(file, "r", encoding="utf-8") as f:
                 filename, extension = os.path.splitext(f.name)
-                if extension in [".pdf", ".xps", ".oxps", ".cbz", ".fb2", ".epub"]:
+                if extension in supported_doc_formats:
                     content = parse_pdf(f)
-                elif extension in [
-                    ".png",
-                    ".jpg",
-                    ".jpeg",
-                    ".bmp",
-                    ".tiff",
-                    ".tif",
-                    ".tga",
-                    ".icb",
-                    ".vda",
-                    ".vst",
-                    ".dcm",
-                    ".dcm30",
-                ]:
+                elif extension in supported_img_formats:
                     loop = asyncio.get_event_loop()
                     loop.run_until_complete(parse_img(f))
                 else:
