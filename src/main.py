@@ -121,15 +121,6 @@ class TabToNormal(metaclass=SingletonTabToNormal):
         )
         df.to_excel(filename + ".xlsx", sheet_name="Sheet1", header=None, index=False)
 
-    """
-    def table_to_new(self, table):
-        table_list = table.splitlines()
-        table_list = [line.split("|") for line in table_list]
-        table_list = [list(filter(None, line)) for line in table_list]
-        table_list = table_list[2:]
-        return table_list
-    """
-
 
 class GUI(ttk.Frame, TabToNormal):
     def __init__(self, master=None):
