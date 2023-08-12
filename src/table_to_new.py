@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from ctypes import *
 
 lib = cdll.LoadLibrary("./table_to_new.so")
@@ -12,6 +14,7 @@ free_table = lib.free_table
 free_table.argtypes = [POINTER(POINTER(c_string))]
 free_table.restype = None
 
+
 def c_string_array_to_list(c_array):
     result = []
     i = 0
@@ -24,6 +27,7 @@ def c_string_array_to_list(c_array):
         result.append(sublist)
         i += 1
     return result
+
 
 def table_to_new(table):
     table_c = c_string(table.encode())
